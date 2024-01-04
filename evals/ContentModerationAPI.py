@@ -28,7 +28,7 @@ class ContentModeration:
         """
         collect = []
         for o in tqdm(messages, total=len(messages)):
-            collect.append(self.cm.get_hate(o))
+            collect.append(self.get_hate(o))
             time.sleep(0.7)
 
         return collect
