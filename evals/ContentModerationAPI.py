@@ -6,7 +6,6 @@ import os
 class ContentModeration:
     def __init__(self):
         openai.api_key = os.environ["OPEN_AI_KEY"]
-        self.cm = ContentModeration()
     def get_hate(self, message):
         """
         Run content moderation on a single message
