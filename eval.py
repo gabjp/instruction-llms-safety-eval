@@ -12,7 +12,7 @@ DS_NAMES =[ "I-Alpaca.json",  "I-CoNa.json",  "I-Controversial.json",  "I-Malici
 
 def main():
     args = parser.parse_args()
-    os.environ["OPEN_AI_JEY"] = args.open_ai_key
+    os.environ["OPEN_AI_KEY"] = args.open_ai_key
 
     for ds_name in DS_NAMES:
         print(f"Evaluating {ds_name}")
