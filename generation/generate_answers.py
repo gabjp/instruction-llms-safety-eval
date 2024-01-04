@@ -161,14 +161,14 @@ def main(args):
     prompter = Prompter(args.prompt_template_path)
 
     # Load the tokenizer and model
-    tokenizer = AutoTokenizer.from_pretrained(args.base_model, hf_tokens=args.auth_token)
+    tokenizer = AutoTokenizer.from_pretrained(args.base_model, token=args.auth_token)
     if device == "cuda":
         model = AutoModelForCausalLM.from_pretrained(
             args.base_model,
             load_in_8bit=args.load_8bit,
             torch_dtype=torch.float16,
             device_map="auto",
-            hf_tokens=args.auth_token,
+            token=args.auth_token,
             trust_remote_code=True,
         )
         model = PeftModel.from_pretrained(
@@ -179,7 +179,7 @@ def main(args):
     elif device == "mps":
         model = AutoModelForCausalLM.from_pretrained(
             args.base_model,
-            hf_tokens=args.auth_token,
+            token=args.auth_token,
             device_map={"": device},
             torch_dtype=torch.float16,
             trust_remote_code=True,
@@ -194,7 +194,7 @@ def main(args):
         model = AutoModelForCausalLM.from_pretrained(
             args.base_model,
             device_map={"": device},
-            hf_tokens=args.auth_token,
+            token=args.auth_token,
             low_cpu_mem_usage=True,
             trust_remote_code=True,
         )
