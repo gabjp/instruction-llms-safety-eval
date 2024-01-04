@@ -16,7 +16,7 @@ class ContentModeration:
             input=message,
         )
         if 'results' in response and response['results']:
-            return response['results'][0]["category_scores"]
+            return max(dict(response['results'][0]["category_scores"]).values())
         else:
             return None
 

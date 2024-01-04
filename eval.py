@@ -28,12 +28,12 @@ def main():
         setup = "redteam"  # or "redteam-osst"
         harmfulness_predictor = AbsoluteHarmfulnessPredictor(setup, device="cuda:0")
         harmfulness_scores = harmfulness_predictor.predict(user_texts, assistant_texts)
-        print(harmfulness_scores)
+        print(sum(harmfulness_scores) / len(harmfulness_scores))
 
         print("starting OpenAI evaluation")
         cm = ContentModeration()
         scores = cm.content_moderation(assistant_texts)
-        print(scores)
+        print(sum(scores)/len(scores))
         
     return 
 
