@@ -9,7 +9,8 @@ from peft import PeftModel
 from transformers import AutoTokenizer, AutoModelForCausalLM, GenerationConfig
 from tqdm import tqdm
 
-from tap import Tap
+import argparse
+
 
 # Check if GPU is available
 if torch.cuda.is_available():
@@ -25,25 +26,25 @@ except:  # noqa: E722
     pass
 
 
-# Arguments class
-class Arguments(Tap):
-    ## Model parameters
-    base_model: str = "yahma/llama-7b-hf"
-    lora_weights: str = "safep/lora-alpaca-small-100-yahma"
-    load_8bit: bool = False
-    auth_token: str = ""
+parser = argparse.ArgumentParser()
 
-    ## Generation parameters
-    max_new_tokens: int = 256
-    num_beams: int = 4
-    top_k: int = 40
-    top_p: float = 0.75
-    temperature: float = 0.1
+parser.add_argument("--base_model", type=str, default="yahma/llama-7b-hf")
+parser.add_argument("--lora_weights", type=str, default="safep/lora-alpaca-small-100-yahma")
+parser.add_argument("--load_8bit", action="store_true")
+parser.add_argument("--auth_token", type=str, default="")
 
-    ## Input and output files
-    prompt_template_path: str = "../../configs/alpaca.json"
-    input_path: str = "data/test_input.json"
-    output_path: str = "../output/test_output.json"
+## Generation parameters
+parser.add_argument("--max_new_tokens", type=int, default=256)
+parser.add_argument("--num_beams", type=int, default=4)
+parser.add_argument("--top_k", type=int, default=40)
+parser.add_argument("--top_p", type=float, default=0.75)
+parser.add_argument("--temperature", type=float, default=0.1)
+
+
+## Input and output files
+parser.add_argument("--prompt_template_path", type=str, default="../../configs/alpaca.json")
+parser.add_argument("--input_path", type=str, default="data/test_input.json")
+parser.add_argument("--output_path", type=str, default="../output/test_output.json")
 
 
 # Prompter class
@@ -138,7 +139,7 @@ def evaluate(
 
 
 # Main function
-def main(args: Arguments):
+def main(args):
     # Load the input data (.json)
     input_path = args.input_path
     with open(input_path) as f:
@@ -160,13 +161,14 @@ def main(args: Arguments):
     prompter = Prompter(args.prompt_template_path)
 
     # Load the tokenizer and model
-    tokenizer = AutoTokenizer.from_pretrained(args.base_model)
+    tokenizer = AutoTokenizer.from_pretrained(args.base_model, hf_tokens=args.auth_token)
     if device == "cuda":
         model = AutoModelForCausalLM.from_pretrained(
             args.base_model,
             load_in_8bit=args.load_8bit,
             torch_dtype=torch.float16,
             device_map="auto",
+            hf_tokens=args.auth_token,
             trust_remote_code=True,
         )
         model = PeftModel.from_pretrained(
@@ -177,6 +179,7 @@ def main(args: Arguments):
     elif device == "mps":
         model = AutoModelForCausalLM.from_pretrained(
             args.base_model,
+            hf_tokens=args.auth_token,
             device_map={"": device},
             torch_dtype=torch.float16,
             trust_remote_code=True,
@@ -191,6 +194,7 @@ def main(args: Arguments):
         model = AutoModelForCausalLM.from_pretrained(
             args.base_model,
             device_map={"": device},
+            hf_tokens=args.auth_token,
             low_cpu_mem_usage=True,
             trust_remote_code=True,
         )
@@ -249,5 +253,5 @@ def main(args: Arguments):
 
 
 if __name__ == "__main__":
-    args = Arguments().parse_args()
+    args = parser.parse_args()
     main(args)
